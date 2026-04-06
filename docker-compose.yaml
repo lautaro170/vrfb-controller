@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # --- MQTT BROKER ---
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: vrfb-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+#     - ./mosquitto/bridge.conf:/mosquitto/config/conf.d/bridge.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  # --- NODE.JS API & WEBSOCKETS ---
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: vrfb-api
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    ports:
+      - "3000:3000"
+    environment:
+      - MQTT_URL=mqtt://mosquitto:1883
+      - NODE_ENV=production
+    volumes:
+      # Persist the SQLite database file on the host (Raspberry Pi)
+      - ./api/data:/usr/src/app/data
+
+  # --- REACT DASHBOARD (NGINX) ---
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: vrfb-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
