@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  # --- POSTGRES DATABASE ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: vrfb-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=vrfb
+      - POSTGRES_USER=vrfb
+      - POSTGRES_PASSWORD=vrfb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   # --- MQTT BROKER ---
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -23,14 +37,14 @@ services:
     restart: unless-stopped
     depends_on:
       - mosquitto
+      - postgres
     ports:
       - "3000:3000"
     environment:
       - MQTT_URL=mqtt://mosquitto:1883
+      - DATABASE_URL=postgresql://vrfb:vrfb@postgres:5432/vrfb
+      - API_KEY=change-this-api-key
       - NODE_ENV=production
-    volumes:
-      # Persist the SQLite database file on the host (Raspberry Pi)
-      - ./api/data:/usr/src/app/data
 
   # --- REACT DASHBOARD (NGINX) ---
   web:
@@ -45,5 +59,6 @@ services:
       - "80:80"
 
 volumes:
+  postgres_data:
   mosquitto_data:
   mosquitto_log:

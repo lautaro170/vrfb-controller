@@ -1,13 +1,25 @@
 {
   "name": "vrfb-controller",
   "version": "1.0.0",
-  "description": "",
+  "description": "VRFB telemetry backend",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "smoke": "npm run build && node dist/smoke-test.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "mqtt": "^5.10.4",
+    "pg": "^8.13.1",
+    "socket.io": "^4.8.1"
+  },
   "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
     "typescript": "^5.5.3"
   },
   "private": true
