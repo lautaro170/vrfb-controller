@@ -18,6 +18,7 @@ Minimal Node.js + TypeScript backend for VRFB telemetry ingestion, persistence, 
 - `MQTT_URL` (example: `mqtt://mosquitto:1883`)
 - `DATABASE_URL` (example: `postgresql://vrfb:vrfb@postgres:5432/vrfb`)
 - `API_KEY` (required)
+- `CORS_ORIGINS` (optional CSV, default allows local Vite origins `http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173`; use `*` to allow all)
 
 ## Telemetry Rules
 

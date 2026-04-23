@@ -20,6 +20,18 @@ type Runtime = {
   mqttClient: MqttClient;
 };
 
+function isOriginAllowed(origin: string | undefined): boolean {
+  if (!origin) {
+    return true;
+  }
+
+  if (config.corsOrigins.includes("*")) {
+    return true;
+  }
+
+  return config.corsOrigins.includes(origin);
+}
+
 function parseTopic(topic: string): string | null {
   const match = /^vrfb\/telemetry\/(.+)$/.exec(topic);
   return match?.[1] ?? null;
@@ -67,7 +79,18 @@ export function createRuntime(): Runtime {
   const server = http.createServer(app);
 
   const io = new SocketIOServer(server, {
-    cors: { origin: "*" },
+    cors: {
+      origin: (origin, callback) => {
+        if (isOriginAllowed(origin)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(new Error("CORS origin not allowed"));
+      },
+      methods: ["GET", "POST", "OPTIONS"],
+      allowedHeaders: ["Authorization", "Content-Type"],
+    },
   });
 
   io.use((socket, next) => {
@@ -88,6 +111,24 @@ export function createRuntime(): Runtime {
   });
 
   app.use(express.json());
+
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+
+    if (typeof origin === "string" && isOriginAllowed(origin)) {
+      res.setHeader("Vary", "Origin");
+      res.setHeader("Access-Control-Allow-Origin", config.corsOrigins.includes("*") ? "*" : origin);
+      res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+      res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    }
+
+    if (req.method === "OPTIONS") {
+      res.sendStatus(204);
+      return;
+    }
+
+    next();
+  });
 
   app.get("/health", (_req: Request, res: Response) => {
     res.json({ ok: true });
