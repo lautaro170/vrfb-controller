@@ -3,7 +3,7 @@ import { KeyRound } from "lucide-react"
 import { Badge } from "@/components/ui/badge.tsx"
 import { Button } from "@/components/ui/button.tsx"
 import { Input } from "@/components/ui/input.tsx"
-import { useTelemetry } from "@/contexts/telemetry-context.tsx"
+import {useAuth} from "@/contexts/auth-context.tsx";
 
 const STATUS_LABEL: Record<string, string> = {
   missing: "Falta key",
@@ -13,7 +13,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export function ApiKeyPanel() {
-  const { apiKey, setApiKey, authStatus } = useTelemetry()
+  const { apiKey, setApiKey, authStatus } = useAuth()
   const [draft, setDraft] = useState(apiKey)
 
   useEffect(() => {

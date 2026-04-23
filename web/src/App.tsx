@@ -5,21 +5,24 @@ import DashboardLayout from "@/components/layouts/dashboard-layout.tsx"
 import Dashboard from "@/pages/dashboard.tsx"
 import LogsPage from "@/pages/logs.tsx"
 import { TelemetryProvider } from "@/contexts/telemetry-context.tsx"
+import {AuthProvider} from "@/contexts/auth-context.tsx";
 
 function App() {
   return (
     <ThemeProvider defaultTheme="light">
-      <TelemetryProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="/logs" element={<LogsPage />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
-      </TelemetryProvider>
+        <AuthProvider>
+          <TelemetryProvider>
+              <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<DashboardLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="/logs" element={<LogsPage />} />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+            <Toaster />
+          </TelemetryProvider>
+        </AuthProvider>
     </ThemeProvider>
   )
 }

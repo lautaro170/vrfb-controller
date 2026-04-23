@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card.tsx"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx"
 import { TELEMETRY_METRICS, type TelemetryMetricDefinition } from "@/constants/telemetry-schema.ts"
 import { useTelemetry } from "@/contexts/telemetry-context.tsx"
+import {useAuth} from "@/contexts/auth-context.tsx";
 
 const ROWS_PER_PAGE = 10
 
@@ -45,7 +46,8 @@ function formatCellValue(value: unknown, metric: TelemetryMetricDefinition) {
 }
 
 export default function LogsPage() {
-  const { authStatus, isLoading, rows, refreshRows } = useTelemetry()
+  const {authStatus} = useAuth();
+  const { isLoading, rows, refreshRows } = useTelemetry()
   const [currentPage, setCurrentPage] = useState(1)
 
   const columns = useMemo(() => TELEMETRY_METRICS, [])

@@ -5,9 +5,11 @@ import { ApiKeyRequired } from "@/components/api-key-required.tsx"
 import { MetricCard } from "@/components/metric-card.tsx"
 import { CATEGORY_ORDER, TELEMETRY_METRICS, TOP_METRIC_KEYS } from "@/constants/telemetry-schema.ts"
 import { useTelemetry } from "@/contexts/telemetry-context.tsx"
+import {useAuth} from "@/contexts/auth-context.tsx";
 
 export default function Dashboard() {
-  const { authStatus, isConnected, isLoading, latestValues, rows } = useTelemetry()
+  const {authStatus} = useAuth()
+  const { isConnected, isLoading, latestValues, rows } = useTelemetry()
 
   if (authStatus === "missing" || authStatus === "invalid") {
     return <ApiKeyRequired invalid={authStatus === "invalid"} />

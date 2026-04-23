@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 import {
-  BackendClientError,
   createTelemetrySocket,
   getTelemetry,
   type TelemetryRow,
@@ -13,13 +12,10 @@ import {
   type TelemetryMetricValue,
   type TelemetryValuesMap,
 } from "@/constants/telemetry-schema.ts"
+import {useAuth} from "@/contexts/auth-context.tsx";
 
-type AuthStatus = "missing" | "validating" | "valid" | "invalid"
 
 type TelemetryContextType = {
-  apiKey: string
-  setApiKey: (value: string) => void
-  authStatus: AuthStatus
   isConnected: boolean
   isLoading: boolean
   latestValues: TelemetryValuesMap
@@ -28,7 +24,6 @@ type TelemetryContextType = {
   refreshRows: () => Promise<void>
 }
 
-const STORAGE_KEY = "vrfb.apiKey"
 const DEVICE_ID = "vrfb1"
 const HISTORY_LIMIT = 100
 
@@ -92,39 +87,12 @@ function parsePayloadValues(payload: TelemetryUpdateEvent["payload"]): Telemetry
   return parsedValues
 }
 
-function isUnauthorizedError(error: unknown): boolean {
-  if (error instanceof BackendClientError) {
-    return error.status === 401 || error.status === 403
-  }
-
-  if (error instanceof Error) {
-    return /unauthorized/i.test(error.message)
-  }
-
-  return false
-}
-
 export function TelemetryProvider({ children }: { children: ReactNode }) {
-  const [apiKey, setApiKeyState] = useState(() => {
-    if (typeof window === "undefined") {
-      return ""
-    }
-
-    return localStorage.getItem(STORAGE_KEY) ?? ""
-  })
-  const [authStatus, setAuthStatus] = useState<AuthStatus>(apiKey.trim() ? "validating" : "missing")
+  const { apiKey } = useAuth()
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [latestValues, setLatestValues] = useState<TelemetryValuesMap>({})
   const [rows, setRows] = useState<TelemetryRow[]>([])
-
-  const setApiKey = (value: string) => {
-    const trimmed = value.trim()
-    setApiKeyState(trimmed)
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, trimmed)
-    }
-  }
 
   const refreshRows = async () => {
     const trimmedKey = apiKey.trim()
@@ -143,16 +111,12 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
       setRows(response.rows)
       setLatestValues(buildLatestValues(response.rows))
     } catch (error) {
-      if (isUnauthorizedError(error)) {
-        setAuthStatus("invalid")
-      }
     }
   }
 
   useEffect(() => {
     const trimmedKey = apiKey.trim()
     if (!trimmedKey) {
-      setAuthStatus("missing")
       setIsConnected(false)
       setLatestValues({})
       setRows([])
@@ -163,7 +127,6 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     const socket = createTelemetrySocket(trimmedKey)
 
     const loadInitialData = async () => {
-      setAuthStatus("validating")
       setIsLoading(true)
 
       try {
@@ -180,18 +143,11 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
 
         setRows(response.rows)
         setLatestValues(buildLatestValues(response.rows))
-        setAuthStatus("valid")
       } catch (error) {
         if (isDisposed) {
           return
         }
-
-        if (isUnauthorizedError(error)) {
-          setAuthStatus("invalid")
-          socket.disconnect()
-        } else {
-          setAuthStatus("valid")
-        }
+         socket.disconnect()
       } finally {
         if (!isDisposed) {
           setIsLoading(false)
@@ -248,12 +204,9 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
       setIsConnected(false)
     })
 
-    socket.on("connect_error", (error: Error) => {
+    socket.on("connect_error", () => {
       setIsConnected(false)
-      if (isUnauthorizedError(error)) {
-        setAuthStatus("invalid")
-        socket.disconnect()
-      }
+      socket.disconnect()
     })
 
     socket.on("telemetry_update", handleUpdate)
@@ -269,9 +222,6 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      apiKey,
-      setApiKey,
-      authStatus,
       isConnected,
       isLoading,
       latestValues,
@@ -279,7 +229,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
       deviceId: DEVICE_ID,
       refreshRows,
     }),
-    [apiKey, authStatus, isConnected, isLoading, latestValues, rows],
+    [isConnected, isLoading, latestValues, rows],
   )
 
   return <TelemetryContext.Provider value={value}>{children}</TelemetryContext.Provider>
