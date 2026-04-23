@@ -1,4 +1,5 @@
-FROM arm32v7/nginx:alpine
+ARG NGINX_IMAGE=nginx:alpine
+FROM ${NGINX_IMAGE}
 
 # Crear un directorio para la aplicación
 WORKDIR /usr/share/nginx/html

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar.tsx"
 import { Gauge, LayoutDashboard, ListFilter, Moon, Sun } from "lucide-react"
 import { useTheme } from "@/components/theme-provider.tsx"
+import { ApiKeyPanel } from "@/components/api-key-panel.tsx"
 
 export default function DashboardLayout() {
   const location = useLocation()
@@ -25,7 +26,7 @@ export default function DashboardLayout() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen w-full">
         <Sidebar>
           <SidebarHeader className="flex items-center justify-between">
             <div className="flex items-center gap-2 px-2">
@@ -60,6 +61,9 @@ export default function DashboardLayout() {
             </SidebarGroup>
           </SidebarContent>
           <SidebarFooter>
+            <div className="space-y-2">
+              <ApiKeyPanel />
+            </div>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>

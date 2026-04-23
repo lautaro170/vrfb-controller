@@ -4,12 +4,12 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import DashboardLayout from "@/components/layouts/dashboard-layout.tsx"
 import Dashboard from "@/pages/dashboard.tsx"
 import LogsPage from "@/pages/logs.tsx"
-import { ConnectionProvider } from "@/contexts/connection-context.tsx"
+import { TelemetryProvider } from "@/contexts/telemetry-context.tsx"
 
 function App() {
   return (
     <ThemeProvider defaultTheme="light">
-      <ConnectionProvider>
+      <TelemetryProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<DashboardLayout />}>
@@ -19,7 +19,7 @@ function App() {
           </Routes>
         </BrowserRouter>
         <Toaster />
-      </ConnectionProvider>
+      </TelemetryProvider>
     </ThemeProvider>
   )
 }

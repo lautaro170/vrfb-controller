@@ -1,95 +1,54 @@
-# PMCD Monitoring Dashboard
+# UI Architecture: VRFB Dashboard Screens
 
-This dashboard provides a web interface for real-time monitoring of PMCD system sensors.
+Framework: React + shadcn/ui + Recharts + TanStack Table
 
-## Features
+## 1. Screen: / (Operacion / Dashboard)
 
-- Real-time sensor data visualization
-- Configurable pressure gauge
-- Historical value graph
-- Status indicators (normal, warning, critical)
-- Temperature monitoring
+Purpose: Main command center for real-time monitoring.
 
-## Requirements
+### Data shown
 
-- Node.js 18 or higher
-- npm or yarn
-- MQTT Broker (Mosquitto)
+- **Top priority:** Battery Voltage (V), Battery Current (A), Tank 1 Temp, Tank 2 Temp.
+- **Electrical:** Battery Voltage (V), Battery Current (A).
+- **Thermal:** Tank 1 Temp, Tank 2 Temp, Ambient Temp, Ambient Humidity.
+- **Chemical:** Conductivity 1, Conductivity 2.
+- **Mechanical:** Pump 1 RPM, Pump 2 RPM.
+- **Solar (read-only):** Solar Voltage (V), Solar Current (A), Total Energy Harvested (Wh), and new solar fields as they become available.
 
-## Installation
+### Components used
 
-1. Install dependencies:
-```bash
-cd dashboard
-npm install
-```
+- `Card` (shadcn): metric cards and section containers.
+- Reusable metric card: supports `min` and `max` thresholds and applies `border-destructive` when out of range.
+- Connection indicator: socket status + current bound device (`vrfb1`).
+- Missing values: keeps last known valid value; shows `-` for `undefined`, `null`, or `NaN`.
+- Command controls are omitted for now.
 
-2. Configure environment variables:
-Create a `.env.local` file with:
-```
-NEXT_PUBLIC_MQTT_BROKER=ws://localhost:9001
-```
+## 2. Screen: /logs (Registro y Datos)
 
-## Development
+Purpose: Historical telemetry review for the same device.
 
-To start the development server:
-```bash
-npm run dev
-```
+### Data shown
 
-The dashboard will be available at `http://localhost:3000`
+- Last X telemetry rows from backend `GET /api/telemetry`.
+- Live updates merged from websocket stream.
+- Dynamic columns based on available telemetry fields.
 
-## Project Structure
+### Components used
 
-```
-dashboard/
-├── src/
-│   ├── components/     # Reusable components
-│   ├── pages/         # Application pages
-│   └── lib/           # Utilities and configurations
-├── public/            # Static files
-└── package.json       # Dependencies and scripts
-```
+- `Table` (shadcn): paginated telemetry rows.
+- `Button` (shadcn): manual refresh and pagination controls.
 
-## MQTT Topics
+## API Key Gate (Shared)
 
-The dashboard subscribes to the following topics:
+Both `/` and `/logs` require a valid API key:
 
-- `pmcd/pressure/1`: Pressure sensor data
-  ```json
-  {
-    "value": 123456,  // value in pascals
-    "time": "2024-03-21T12:34:56Z"  // ISO timestamp
-  }
-  ```
+- API key is entered from the bottom-left sidebar panel.
+- API key is persisted locally in browser storage.
+- If API key is missing or invalid, telemetry UI is hidden and replaced by the same prompt section.
+- Backend auth format: `Authorization: Bearer <API_KEY>` for HTTP and socket auth token.
 
-- `pmcd/temp`: Temperature data
-  ```json
-  {
-    "value": 25.5,    // value in Celsius
-    "time": "2024-03-21T12:34:56Z"  // ISO timestamp
-  }
-  ```
+## Data Source
 
-## Pressure Configuration
-
-The dashboard allows configuration of:
-- Minimum pressure (Pa)
-- Maximum pressure (Pa, default 200,000)
-
-States are automatically determined:
-- Normal: < 80% of range
-- Warning: 80-90% of range
-- Critical: > 90% of range
-
-## Production Build
-
-To build the application for production:
-```bash
-npm run build
-```
-
-To start the production version:
-```bash
-npm start
-```
+- Initial hydration and table data: `GET /api/telemetry`.
+- Real-time stream: Socket.io event `telemetry_update`.
+- Device binding: fixed to `vrfb1`.
