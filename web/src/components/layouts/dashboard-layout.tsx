@@ -31,7 +31,7 @@ export default function DashboardLayout() {
           <SidebarHeader className="flex items-center justify-between">
             <div className="flex items-center gap-2 px-2">
               <Gauge className="h-6 w-6" />
-              <span className="text-lg font-bold">SensorDash</span>
+              <span className="text-lg font-bold">UTN GMF</span>
             </div>
           </SidebarHeader>
           <SidebarSeparator />
