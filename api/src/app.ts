@@ -162,10 +162,17 @@ export function createRuntime(): Runtime {
     }
 
     const rangeMinutes = parsePositiveInt(req.query.range as string | undefined, 5);
-    const series = resolveSeries(req.query.series as string | undefined);
+    const requestedSeries = req.query.series as string | undefined;
+    const series = resolveSeries(requestedSeries);
 
     if (!series) {
-      res.status(400).json({ error: "Bad request" });
+      res.json({
+        deviceId,
+        series: requestedSeries ?? "",
+        rangeMinutes,
+        bucketMinutes: config.historyBucketMinutes,
+        points: [],
+      });
       return;
     }
 

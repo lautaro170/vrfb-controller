@@ -10,6 +10,7 @@ type MetricCardProps = {
   min?: number
   max?: number
   decimals?: number
+  onClick?: () => void
 }
 
 function formatValue(value: TelemetryMetricValue | undefined, valueType: TelemetryValueType, decimals = 2) {
@@ -33,15 +34,35 @@ function formatValue(value: TelemetryMetricValue | undefined, valueType: Telemet
   return value.toFixed(decimals)
 }
 
-export function MetricCard({ label, value, valueType, unit, min, max, decimals = 2 }: MetricCardProps) {
+export function MetricCard({ label, value, valueType, unit, min, max, decimals = 2, onClick }: MetricCardProps) {
   const isOutOfRange =
     valueType === "number" &&
     typeof value === "number" &&
     Number.isFinite(value) &&
     ((min !== undefined && value < min) || (max !== undefined && value > max))
 
+  const isClickable = typeof onClick === "function" && valueType === "number"
+
   return (
-    <Card className={cn(isOutOfRange && "border-destructive") }>
+    <Card
+      className={cn(
+        isOutOfRange && "border-destructive",
+        isClickable && "cursor-pointer transition-colors hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring"
+      )}
+      onClick={isClickable ? onClick : undefined}
+      onKeyDown={
+        isClickable
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault()
+                onClick?.()
+              }
+            }
+          : undefined
+      }
+      role={isClickable ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+    >
       <CardHeader>
         <CardTitle className="text-sm font-medium">{label}</CardTitle>
       </CardHeader>
