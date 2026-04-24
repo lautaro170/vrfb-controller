@@ -1,10 +1,11 @@
 import { io, type Socket } from "socket.io-client"
-import type { TelemetryMetricKey } from "@/constants/telemetry-schema.ts"
+import type { TelemetryMetricKey, TelemetryMetricValue } from "@/constants/telemetry-schema.ts"
 
 export type TelemetryRow = {
+  id: number
   time: string
   device_id: string
-} & Partial<Record<TelemetryMetricKey, number | string | null>>
+} & Partial<Record<TelemetryMetricKey, TelemetryMetricValue>>
 
 export type TelemetryListResponse = {
   deviceId: string
@@ -78,6 +79,7 @@ export function getTelemetry(params: {
   deviceId: string
   limit: number
   offset: number
+  maxId?: number | null
 }) {
   const search = new URLSearchParams({
     deviceId: params.deviceId,

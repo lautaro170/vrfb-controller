@@ -2,8 +2,27 @@ export type TelemetryValueType = "number" | "text"
 
 export type TelemetryCategory = "Electrical" | "Thermal" | "Chemical" | "Mechanical" | "Solar" | "State"
 
+export const TELEMETRY_METRIC_KEYS = [
+  "voltage_battery",
+  "current_battery",
+  "temp_tank_1",
+  "temp_tank_2",
+  "temp_ambient",
+  "humidity_ambient",
+  "conductivity_1",
+  "conductivity_2",
+  "pump_1_rpm",
+  "pump_2_rpm",
+  "voltage_solar",
+  "current_solar",
+  "total_energy_harvested",
+  "current_state",
+] as const
+
+export type TelemetryMetricKey = (typeof TELEMETRY_METRIC_KEYS)[number]
+
 export type TelemetryMetricDefinition = {
-  key: string
+  key: TelemetryMetricKey
   label: string
   valueType: TelemetryValueType
   unit?: string
@@ -28,9 +47,8 @@ export const TELEMETRY_METRICS: ReadonlyArray<TelemetryMetricDefinition> = [
   { key: "current_solar", label: "Solar Current", valueType: "number", unit: "A", category: "Solar", min: 0, max: 120, decimals: 2 },
   { key: "total_energy_harvested", label: "Total Energy Harvested", valueType: "number", unit: "Wh", category: "Solar", min: 0, decimals: 2 },
   { key: "current_state", label: "Current State", valueType: "text", category: "State" },
-] as const
+]
 
-export type TelemetryMetricKey = (typeof TELEMETRY_METRICS)[number]["key"]
 export type TelemetryMetricValue = number | string
 
 export type TelemetryValuesMap = Partial<Record<TelemetryMetricKey, TelemetryMetricValue>>
@@ -59,4 +77,3 @@ export const METRIC_DEFINITION_BY_KEY: Readonly<Record<TelemetryMetricKey, Telem
   },
   {} as Record<TelemetryMetricKey, TelemetryMetricDefinition>,
 )
-
