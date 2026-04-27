@@ -12,3 +12,4 @@ yarn-error.log*
 .idea
 /api/node_modules/
 /api/.env
+/api/dist/
