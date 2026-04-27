@@ -45,6 +45,8 @@ services:
       - DATABASE_URL=postgresql://vrfb:vrfb@postgres:5432/vrfb
       - API_KEY=change-this-api-key
       - NODE_ENV=production
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost,http://10.10.10.1,http://192.168.0.1,http://10.10.10.1:5173,http://192.168.0.1:5173
+
 
   # --- REACT DASHBOARD (NGINX) ---
   web:
