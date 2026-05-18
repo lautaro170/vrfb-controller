@@ -38,6 +38,8 @@ function readCorsOrigins(): string[] {
 export const config = {
   port: Number(process.env.PORT ?? "3000"),
   mqttUrl: readEnv("MQTT_URL", "mqtt://localhost:1883"),
+  mqttUser: readEnv("MQTT_USER", 'vrfb1'),
+  mqttPassword: readEnv("MQTT_PASSWORD", 'vrfb1UTN'),
   mqttTopic: "vrfb/telemetry/+",
   apiKey: readEnv("API_KEY"),
   databaseUrl: readEnv("DATABASE_URL"),

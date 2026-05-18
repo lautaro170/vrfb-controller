@@ -192,6 +192,8 @@ export function createRuntime(): Runtime {
 
   const mqttClient = mqtt.connect(config.mqttUrl, {
     reconnectPeriod: 5000,
+    username: config.mqttUser,
+    password: config.mqttPassword,
   });
 
   mqttClient.on("connect", () => {
