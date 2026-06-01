@@ -1,3 +1,4 @@
+import { normalizeMqttUrl } from "./config";
 import { normalizeTelemetryPayload, resolveSeries } from "./telemetry";
 
 function assert(condition: boolean, message: string): void {
@@ -19,6 +20,10 @@ function run(): void {
   assert(normalized.values.pump_1_rpm === 1200, "Expected pump mapping");
   assert(resolveSeries("voltage") === "voltage_battery", "Expected default alias");
   assert(resolveSeries("temp_tank_1") === "temp_tank_1", "Expected exact series");
+  assert(
+    normalizeMqttUrl("mqtt://broker.example.com:8883") === "mqtts://broker.example.com:8883",
+    "Expected TLS port 8883 to normalize to mqtts",
+  );
 
   // eslint-disable-next-line no-console
   console.log("Smoke test passed");

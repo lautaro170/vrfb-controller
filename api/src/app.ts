@@ -197,7 +197,34 @@ export function createRuntime(): Runtime {
   });
 
   mqttClient.on("connect", () => {
-    mqttClient.subscribe(config.mqttTopic);
+    // eslint-disable-next-line no-console
+    console.log(`Connected to MQTT broker at ${config.mqttUrl}`);
+
+    mqttClient.subscribe(config.mqttTopic, (error) => {
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to subscribe to ${config.mqttTopic}`, error);
+        return;
+      }
+
+      // eslint-disable-next-line no-console
+      console.log(`Subscribed to ${config.mqttTopic}`);
+    });
+  });
+
+  mqttClient.on("reconnect", () => {
+    // eslint-disable-next-line no-console
+    console.log("Reconnecting to MQTT broker...");
+  });
+
+  mqttClient.on("close", () => {
+    // eslint-disable-next-line no-console
+    console.warn("MQTT connection closed");
+  });
+
+  mqttClient.on("error", (error) => {
+    // eslint-disable-next-line no-console
+    console.error("MQTT connection error", error);
   });
 
   mqttClient.on("message", async (topic, buffer) => {
