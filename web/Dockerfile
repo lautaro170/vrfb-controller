@@ -1,17 +1,18 @@
-ARG NGINX_IMAGE=nginx:alpine
-FROM ${NGINX_IMAGE}
+FROM node:20-alpine AS build
 
-# Crear un directorio para la aplicación
-WORKDIR /usr/share/nginx/html
+WORKDIR /app
 
-# Eliminar archivos por defecto de nginx
-RUN rm -rf /usr/share/nginx/html/*
+COPY package*.json ./
+RUN npm ci
 
-# Copiar la build de la aplicación React
-COPY ./dist .
+COPY . .
+RUN npm run build
 
-# Exponer el puerto 80 (el puerto predeterminado de Nginx)
+FROM nginx:alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+
 EXPOSE 80
 
-# Comando para iniciar el servidor Nginx
 CMD ["nginx", "-g", "daemon off;"]
